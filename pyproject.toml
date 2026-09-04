@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "diagnosqui"
+version = "2.4.1"
+description = "Herramienta avanzada de diagnóstico y administración de hardware para Windows y Linux"
+readme = "README.md"
+requires-python = ">=3.9"
+authors = [
+    { name = "DiagnosQui Team" }
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux",
+    "Topic :: System :: Hardware",
+    "Topic :: System :: Monitoring"
+]
+dependencies = [
+    "psutil>=5.9",
+    "rich>=13.0",
+    "prompt_toolkit>=3.0",
+    "pyfiglet>=1.0"
+]
+
+[project.optional-dependencies]
+windows = [
+    "wmi>=1.5",
+    "pywin32>=306"
+]
+
+[project.scripts]
+diagnosqui = "diagnosqui.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["diagnosqui*"]

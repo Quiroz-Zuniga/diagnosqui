@@ -3,6 +3,8 @@
 **Administrador y Diagnóstico de Hardware Multiplataforma (Windows & Linux)**
 
 DiagnosQui es una herramienta en consola diseñada para inspeccionar, monitorizar y diagnosticar componentes de hardware (CPU, RAM, discos, red, USB, buses PCI/PCIe, controladores y GPU), evaluando anomalías y generando reportes estructurados en CSV y HTML con veredicto automático.
+<img width="1588" height="752" alt="image" src="https://github.com/user-attachments/assets/98a1c074-b2c8-4e90-b6d9-ccf5f4c4f3a2" />
+
 
 ---
 

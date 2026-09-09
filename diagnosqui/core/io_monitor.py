@@ -1,12 +1,19 @@
 """
 Módulo para monitorización en tiempo real de operaciones de E/S (disco y red).
 """
+import json
 import time
 from rich.table import Table
 from rich.panel import Panel
 from rich.progress import Progress, SpinnerColumn, TextColumn
 from diagnosqui.core.platform_utils import get_backend
 from diagnosqui.ui.theme import console, print_header
+
+
+def recolectar_io_delta(duration: int = 3) -> dict:
+    """Recolecta delta de E/S y devuelve dict (no contrato unificado, es medición dinámica)."""
+    backend = get_backend()
+    return backend.get_io_delta(duration)
 
 
 def show_io_monitor(sample_seconds: int = 3):
@@ -82,3 +89,8 @@ def show_io_monitor(sample_seconds: int = 3):
     perif_table.add_row("Adaptador de Salida Gráfica", "[green][OK] Renderizando a consola de terminal[/green]")
 
     console.print(Panel(perif_table, border_style="cyan", title="[bold white]Subsistemas Periféricos de Interacción[/bold white]"))
+
+
+if __name__ == "__main__":
+    resultado = recolectar_io_delta(3)
+    print(json.dumps(resultado, indent=2, ensure_ascii=False))

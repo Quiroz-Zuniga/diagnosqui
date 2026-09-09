@@ -223,9 +223,10 @@ def show_reporte(export_files: bool = True):
     """Muestra la matriz de diagnóstico, el veredicto y genera los archivos de reporte."""
     print_header("Reporte y Matriz de Diagnóstico", "Módulo 12 / Matriz & Veredicto")
 
+    from diagnosqui.core.platform_utils import get_backend
     backend = get_backend()
     sys_info = backend.get_system_info()
-    matrix = build_diagnostic_matrix(backend)
+    matrix = build_diagnostic_matrix()
     verdict = diagnostico_final(matrix)
 
     # 1. Tabla de Matriz en Terminal

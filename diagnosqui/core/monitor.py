@@ -1,20 +1,35 @@
 """
 Módulo para visualización y diagnóstico de GPU y adaptadores de pantalla.
 """
+import json
 from rich.table import Table
 from rich.panel import Panel
 from diagnosqui.core.platform_utils import get_backend
 from diagnosqui.ui.theme import console, print_header, print_status_badge
 
 
+def recolectar_gpu() -> dict:
+    """Recolecta datos de GPU y devuelve el CONTRATO UNIFICADO."""
+    backend = get_backend()
+    return backend.get_gpu_info()
+
+
 def show_monitor():
     """Muestra información de la tarjeta gráfica (GPU), memoria VRAM y controladores de video."""
     print_header("Diagnóstico de GPU y Pantalla", "Módulo 10 / GPU & Gráficos")
 
-    backend = get_backend()
-    data = backend.get_gpu_info()
+    data = recolectar_gpu()
 
-    gpus = data["gpus"]
+    if "error" in data.get("detalle", {}):
+        console.print(Panel(f"[red]Error: {data['detalle']['error']}[/red]", border_style="red"))
+        return
+
+    detalle = data.get("detalle", {})
+    estado = data.get("estado", "NORMAL")
+    evidencia = data.get("evidencia", "N/D")
+    recomendaciones = data.get("recomendacion", [])
+
+    gpus = detalle.get("gpus", [])
 
     if gpus:
         table = Table(title="[bold white]Adaptadores de Video Detectados[/bold white]", border_style="cyan")
@@ -37,18 +52,20 @@ def show_monitor():
         console.print(table)
         console.print()
 
-        if data["is_healthy"]:
-            panel = Panel(
-                f"{print_status_badge('OK')} [green]Los adaptadores gráficos responden correctamente con estado OK.[/green]",
-                border_style="green",
-                title="[bold green]Salud Gráfica[/bold green]"
-            )
-        else:
-            panel = Panel(
-                f"{print_status_badge('ALERTA')} [yellow]Se detectaron anomalías o drivers genéricos en el controlador de video. Puede causar problemas de renderizado o baja tasa de refresco.[/yellow]",
-                border_style="yellow",
-                title="[bold yellow]Atención Gráfica[/bold yellow]"
-            )
-        console.print(panel)
-    else:
-        console.print("[yellow]No se detectaron adaptadores de video activos mediante la interfaz WMI/LSPCI.[/yellow]")
+    # Estado global
+    status_table = Table(show_header=False, box=None)
+    status_table.add_column("Label", style="bold")
+    status_table.add_column("Value")
+    status_table.add_row("Estado:", f"{print_status_badge(estado)} {evidencia}")
+
+    if recomendaciones:
+        for rec in recomendaciones:
+            status_table.add_row("Recomendación:", f"[cyan]→ {rec}[/cyan]")
+
+    border_color = "yellow" if estado == "ADVERTENCIA" else ("red" if estado == "CRITICO" else "green")
+    console.print(Panel(status_table, border_style=border_color))
+
+
+if __name__ == "__main__":
+    resultado = recolectar_gpu()
+    print(json.dumps(resultado, indent=2, ensure_ascii=False))

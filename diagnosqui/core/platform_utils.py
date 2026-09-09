@@ -2,7 +2,7 @@
 Utilidades de detección de plataforma y selección de backend para DiagnosQui.
 """
 import sys
-from typing import Optional
+from typing import Any, Dict, Optional
 from rich.panel import Panel
 from rich.text import Text
 
@@ -26,6 +26,12 @@ def get_backend() -> BaseBackend:
         _BACKEND_INSTANCE = LinuxBackend()
 
     return _BACKEND_INSTANCE
+
+
+def get_connectivity_info() -> Dict[str, Any]:
+    """Obtiene información de conectividad del backend actual."""
+    backend = get_backend()
+    return backend.get_connectivity_info()
 
 
 def check_elevation_warning() -> None:

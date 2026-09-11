@@ -5,7 +5,7 @@ import json
 from rich.table import Table
 from rich.panel import Panel
 from diagnosqui.core.platform_utils import get_backend, check_elevation_warning
-from diagnosqui.ui.theme import console, print_header, print_status_badge
+from diagnosqui.ui.theme import console, print_header
 
 
 def recolectar_sistema() -> dict:

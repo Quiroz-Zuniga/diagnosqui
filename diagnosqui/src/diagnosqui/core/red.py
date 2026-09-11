@@ -126,8 +126,8 @@ def show_red():
     dns_servers = conn_detalle.get("dns_servers", [])
 
     conn_table.add_row("Gateway", f"{gw_ip} — {'[green]OK[/green]' if gw_ok else '[red]FAIL[/red]'}")
-    conn_table.add_row("Internet (8.8.8.8)", "'[green]OK[/green]' if inet_ok else '[red]FAIL[/red]'")
-    conn_table.add_row("Resolución DNS (google.com)", "'[green]OK[/green]' if dns_ok else '[red]FAIL[/red]'")
+    conn_table.add_row("Internet (8.8.8.8)", f"{'[green]OK[/green]' if inet_ok else '[red]FAIL[/red]'}")
+    conn_table.add_row("Resolución DNS (google.com)", f"{'[green]OK[/green]' if dns_ok else '[red]FAIL[/red]'}")
 
     console.print(conn_table)
     console.print()

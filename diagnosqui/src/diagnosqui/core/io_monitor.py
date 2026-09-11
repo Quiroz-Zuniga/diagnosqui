@@ -2,7 +2,6 @@
 Módulo para monitorización en tiempo real de operaciones de E/S (disco y red).
 """
 import json
-import time
 from rich.table import Table
 from rich.panel import Panel
 from rich.progress import Progress, SpinnerColumn, TextColumn

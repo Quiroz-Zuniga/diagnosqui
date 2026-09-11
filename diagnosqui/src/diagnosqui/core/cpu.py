@@ -66,7 +66,6 @@ def show_cpu():
 
     # Estado global - usar el estado del contrato
     estado = data.get("estado", "NORMAL")
-    valor = data.get("valor_numerico", 0)
     evidencia = data.get("evidencia", "N/D")
     recomendaciones = data.get("recomendacion", [])
 

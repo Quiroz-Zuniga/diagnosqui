@@ -11,7 +11,7 @@ Todos los métodos de recolección devuelven el CONTRATO UNIFICADO:
 }
 """
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List
+from typing import Any, Dict
 
 
 class BaseBackend(ABC):

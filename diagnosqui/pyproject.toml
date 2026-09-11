@@ -6,15 +6,17 @@ build-backend = "setuptools.build_meta"
 name = "diagnosqui"
 version = "2.4.1"
 description = "DiagnosQui ⚡ Administrador y Diagnóstico de Hardware Multiplataforma"
-readme = "README.md"
+readme = {text = "DiagnosQui para Windows y Linux: escritorio nativo PySide6 con proveedores reales y terminal interactiva con diagnósticos de prueba; ambos monitores usan psutil. Consulta el README.md en la raíz del repositorio para instalar y usar la aplicación.", content-type = "text/markdown"}
 authors = [{name = "DiagnosQui Team"}]
 license = {text = "MIT"}
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 dependencies = [
-    "psutil>=5.9.0",
-    "rich>=13.0.0",
-    "prompt-toolkit>=3.0.0",
-    "pyfiglet>=0.8",
+    "psutil>=5.9",
+    "rich>=13.0",
+    "prompt_toolkit>=3.0",
+    "pyfiglet>=1.0",
+    "textual>=1.0,<9",
+    "PySide6>=6.7",
 ]
 classifiers = [
     "Programming Language :: Python :: 3",
@@ -23,10 +25,17 @@ classifiers = [
 ]
 
 [project.optional-dependencies]
-windows = ["pywin32>=306", "wmi>=1.5.1"]
+windows = ["pywin32>=306", "wmi>=1.5"]
 
 [project.scripts]
 diagnosqui = "diagnosqui.cli:main"
+
+[project.gui-scripts]
+diagnosqui-gui = "diagnosqui.gui_cli:main"
+DiagnosQui-Escritorio = "diagnosqui.gui_cli:main"
+
+[tool.setuptools.package-data]
+"diagnosqui.gui" = ["styles/*.qss", "resources/icons/*.svg", "resources/icons/LICENSE"]
 
 [tool.setuptools.packages.find]
 where = ["src"]

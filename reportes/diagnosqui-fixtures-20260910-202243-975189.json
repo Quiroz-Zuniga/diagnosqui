@@ -1,0 +1,123 @@
+[
+  {
+    "componente": "CPU",
+    "evidencia": "42% de uso",
+    "valor_numerico": 42,
+    "estado": "NORMAL",
+    "detalle": {
+      "fuente": "fixture",
+      "nucleos": 8
+    },
+    "recomendacion": [
+      "Mantener ventilación adecuada."
+    ]
+  },
+  {
+    "componente": "Memoria RAM",
+    "evidencia": "76% utilizado · 12,2 / 16 GB",
+    "valor_numerico": 76,
+    "estado": "ADVERTENCIA",
+    "detalle": {
+      "fuente": "fixture"
+    },
+    "recomendacion": [
+      "Cerrar aplicaciones que no se utilicen."
+    ]
+  },
+  {
+    "componente": "PCI / PCIe",
+    "evidencia": "4 dispositivos detectados",
+    "valor_numerico": 4,
+    "estado": "NORMAL",
+    "detalle": {
+      "fuente": "fixture"
+    },
+    "recomendacion": [
+      "No se requieren acciones."
+    ]
+  },
+  {
+    "componente": "Red",
+    "evidencia": "Ethernet conectado · 1 Gbps",
+    "valor_numerico": 12,
+    "estado": "NORMAL",
+    "detalle": {
+      "fuente": "fixture"
+    },
+    "recomendacion": [
+      "Mantener el controlador actualizado."
+    ]
+  },
+  {
+    "componente": "USB",
+    "evidencia": "3 dispositivos reconocidos",
+    "valor_numerico": 3,
+    "estado": "NORMAL",
+    "detalle": {
+      "fuente": "fixture"
+    },
+    "recomendacion": [
+      "Expulsar las unidades antes de desconectarlas."
+    ]
+  },
+  {
+    "componente": "Almacenamiento",
+    "evidencia": "92% ocupado · 460 / 500 GB",
+    "valor_numerico": 92,
+    "estado": "CRITICO",
+    "detalle": {
+      "fuente": "fixture"
+    },
+    "recomendacion": [
+      "Liberar espacio después de respaldar los archivos."
+    ]
+  },
+  {
+    "componente": "GPU / vídeo",
+    "evidencia": "28% de uso · 45 °C",
+    "valor_numerico": 28,
+    "estado": "NORMAL",
+    "detalle": {
+      "fuente": "fixture"
+    },
+    "recomendacion": [
+      "Mantener ventilación adecuada."
+    ]
+  },
+  {
+    "componente": "Controladores",
+    "evidencia": "1 actualización pendiente (simulada)",
+    "valor_numerico": 1,
+    "estado": "ADVERTENCIA",
+    "detalle": {
+      "fuente": "fixture"
+    },
+    "recomendacion": [
+      "Consultar el controlador en la web del fabricante."
+    ]
+  },
+  {
+    "componente": "Dispositivos con problemas",
+    "evidencia": "1 incidencia simulada: adaptador USB",
+    "valor_numerico": 1,
+    "estado": "ADVERTENCIA",
+    "detalle": {
+      "fuente": "fixture"
+    },
+    "recomendacion": [
+      "Revisar la conexión del adaptador USB."
+    ]
+  },
+  {
+    "componente": "Conectividad",
+    "evidencia": "Latencia simulada: 18 ms · 0% pérdida",
+    "valor_numerico": 18,
+    "estado": "NORMAL",
+    "detalle": {
+      "fuente": "fixture"
+    },
+    "recomendacion": [
+      "La conexión de ejemplo responde correctamente."
+    ]
+  }
+]

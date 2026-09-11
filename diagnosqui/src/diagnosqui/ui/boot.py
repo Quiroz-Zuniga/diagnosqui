@@ -1,100 +1,80 @@
-"""
-Animación de inicialización estilo 'npm install' y presentación de banner.
-"""
-import sys
+"""Presentación visual estilo npm: no instala paquetes ni inspecciona hardware."""
+
+from __future__ import annotations
+
 import time
-import random
-import importlib
+
 import pyfiglet
-from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TimeElapsedColumn
-from rich.panel import Panel
+from rich.progress import Progress, SpinnerColumn, TextColumn
 from rich.text import Text
-from diagnosqui.ui.theme import console
+
+from diagnosqui.ui.theme import MUTED_STYLE, NORMAL_STYLE, PRIMARY_STYLE, console
 
 
-PACKAGES_SIMULATED = [
-    ("@diagnosqui/core-engine", "2.4.1", "motor de diagnóstico de hardware"),
-    ("@diagnosqui/win32-pnp-bridge", "1.1.0", "interfaz de buses PnP y CIM"),
-    ("@diagnosqui/linux-sysfs-scanner", "3.0.2", "conector para /proc y /sys"),
-    ("@diagnosqui/pci-enumerator", "1.4.0", "analizador de topología PCIe"),
-    ("@diagnosqui/usb-descriptor-parser", "2.0.1", "decodificador de endpoints USB"),
-    ("@diagnosqui/gpu-telemetry", "1.0.8", "colector de VRAM y estados de driver"),
-    ("@diagnosqui/smart-matrix-engine", "4.2.0", "matriz de correlación de fallos"),
-    ("@diagnosqui/report-generator-html", "2.3.0", "renderizador de reportes ejecutivos"),
-]
+# Rich denomina "dots" a esta secuencia de diez caracteres braille.
+BRAILLE_SPINNER_FRAMES = "⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏"
+
+PACKAGES_SIMULATED = (
+    ("os-probe", "1.8.0", "sondeo de sistema"),
+    ("kernel-inspect", "0.9.3", "inspección de kernel"),
+    ("driver-scan", "2.1.0", "catálogo de controladores"),
+    ("memory-check", "1.3.2", "diagnóstico de memoria"),
+    ("storage-probe", "1.5.0", "diagnóstico de almacenamiento"),
+    ("network-check", "0.8.4", "pruebas de conectividad"),
+    ("device-map", "1.2.1", "inventario de dispositivos"),
+    ("report-kit", "1.0.0", "presentación de reportes"),
+)
 
 
-def check_real_dependencies() -> list[tuple[str, bool, str]]:
-    """Valida los módulos reales instalados en el entorno."""
-    checks = [
-        ("psutil", "Telemetría de CPU, RAM y Discos"),
-        ("rich", "Motor de renderizado de terminal"),
-        ("prompt_toolkit", "Línea de comandos interactiva"),
-        ("pyfiglet", "Generador de arte ASCII"),
-    ]
-    if sys.platform == "win32":
-        checks.append(("wmi", "Interfaz WMI de Windows"))
-        checks.append(("win32api", "Extensiones de pywin32"))
+def run_boot_animation(force_verbose: bool = False) -> None:
+    """Muestra el arranque; las salidas sin TTY se generan sin esperas.
 
-    results = []
-    for mod_name, desc in checks:
-        try:
-            importlib.import_module(mod_name)
-            results.append((mod_name, True, desc))
-        except ImportError:
-            results.append((mod_name, False, desc))
-    return results
+    ``force_verbose`` añade las descripciones de los paquetes de ejemplo.
+    La persistencia de la primera ejecución corresponde al punto de entrada.
+    """
+    animated = console.is_terminal and not console.is_dumb_terminal
+    console.print("$ npm install -g diagnosqui", style=PRIMARY_STYLE, markup=False)
+    console.print(
+        "Simulación visual de instalación · paquetes de ejemplo", style=MUTED_STYLE
+    )
+    started = time.perf_counter()
 
-
-def run_boot_animation(force_verbose: bool = False):
-    """Ejecuta la secuencia de arranque con estilo npm install y banner figlet."""
-    console.clear()
-    console.print("[cyan bold]DiagnosQui CLI[/cyan bold] [muted]v2.4.1[/muted]")
-    console.print("[muted]Inicializando entorno de telemetría y periféricos...[/muted]\n")
-
-    start_time = time.time()
+    if not animated:
+        console.print("resolviendo dependencias...", style=MUTED_STYLE)
 
     with Progress(
-        SpinnerColumn(spinner_name="dots"),
-        TextColumn("[progress.description]{task.description}"),
-        BarColumn(bar_width=35, complete_style="green", finished_style="cyan"),
-        TextColumn("[cyan]{task.percentage:>3.0f}%"),
-        TimeElapsedColumn(),
+        SpinnerColumn("dots", style=PRIMARY_STYLE, finished_text="✔"),
+        TextColumn("{task.description}", style=MUTED_STYLE, markup=False),
         console=console,
-        transient=False,
+        transient=True,
+        disable=not animated,
+        refresh_per_second=12,
     ) as progress:
-        task_resolve = progress.add_task("[yellow]Resolviendo dependencias del sistema...", total=len(PACKAGES_SIMULATED))
+        task = progress.add_task("resolviendo dependencias...", total=None)
+        if animated:
+            time.sleep(0.35)
+        for package, version, description in PACKAGES_SIMULATED:
+            progress.update(task, description=f"preparando {package}@{version}...")
+            if animated:
+                time.sleep(0.30)
+            line = Text("✔ ", style=NORMAL_STYLE)
+            line.append(f"{package}@{version}")
+            if force_verbose:
+                line.append(f"  {description}", style=MUTED_STYLE)
+            progress.console.print(line)
 
-        for pkg, ver, desc in PACKAGES_SIMULATED:
-            progress.update(task_resolve, advance=1, description=f"[cyan]fetch[/cyan] {pkg}@{ver} ({desc})")
-            time.sleep(random.uniform(0.08, 0.18))
-
-        task_audit = progress.add_task("[magenta]Auditando compatibilidad de hardware...", total=100)
-        for pct in (20, 45, 70, 90, 100):
-            time.sleep(0.1)
-            progress.update(task_audit, completed=pct)
-
-    real_checks = check_real_dependencies()
-    total_packages = len(PACKAGES_SIMULATED) + len(real_checks)
-    elapsed = time.time() - start_time
-
-    console.print()
+    elapsed = time.perf_counter() - started
     console.print(
-        f"[green][OK][/green] [bold white]added {total_packages} packages[/bold white] "
-        f"[muted]and audited system hardware modules in {elapsed:.2f}s[/muted]"
+        f"added {len(PACKAGES_SIMULATED)} packages in {elapsed:.1f}s",
+        style=NORMAL_STYLE,
+        markup=False,
     )
-    console.print("[green][OK][/green] [muted]found 0 vulnerabilities across subsystems[/muted]\n")
-
-    # Banner PyFiglet
-    ascii_banner = pyfiglet.figlet_format("DiagnosQui", font="slant")
-    banner_panel = Panel(
-        Text(ascii_banner, style="cyan bold"),
-        subtitle="[bold white]v2.4.1 — Administrador & Diagnóstico de Hardware[/bold white]",
-        subtitle_align="right",
-        border_style="bright_blue",
-        padding=(0, 2),
-    )
-    console.print(banner_panel)
+    console.print()
+    # El tipo compacto conserva la legibilidad en terminales estrechas.
+    font = "slant" if console.width >= 76 else "small"
+    banner = pyfiglet.figlet_format("DiagnosQui", font=font, width=console.width)
+    console.print(Text(banner.rstrip(), style=PRIMARY_STYLE))
+    console.print("DiagnosQui · Diagnóstico de hardware", style=PRIMARY_STYLE)
     console.print()
 
 

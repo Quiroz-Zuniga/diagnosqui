@@ -22,7 +22,9 @@ dependencies = [
     "psutil>=5.9",
     "rich>=13.0",
     "prompt_toolkit>=3.0",
-    "pyfiglet>=1.0"
+    "pyfiglet>=1.0",
+    "textual>=1.0,<9",
+    "PySide6>=6.7"
 ]
 
 [project.optional-dependencies]
@@ -34,6 +36,13 @@ windows = [
 [project.scripts]
 diagnosqui = "diagnosqui.cli:main"
 
+[project.gui-scripts]
+diagnosqui-gui = "diagnosqui.gui_cli:main"
+DiagnosQui-Escritorio = "diagnosqui.gui_cli:main"
+
+[tool.setuptools.package-data]
+"diagnosqui.gui" = ["styles/*.qss", "resources/icons/*.svg", "resources/icons/LICENSE"]
+
 [tool.setuptools.packages.find]
-where = ["."]
+where = ["diagnosqui/src"]
 include = ["diagnosqui*"]

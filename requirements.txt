@@ -2,3 +2,5 @@ psutil>=5.9
 rich>=13.0
 prompt_toolkit>=3.0
 pyfiglet>=1.0
+textual>=1.0,<9
+PySide6>=6.7

@@ -499,6 +499,7 @@ class WindowsBackend(BaseBackend):
             try:
                 res = subprocess.run(
                     ["driverquery", "/FO", "CSV"],
+                    timeout=15,
                     capture_output=True,
                     text=True,
                     creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),

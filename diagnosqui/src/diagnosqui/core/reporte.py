@@ -4,11 +4,11 @@ Módulo para generación de la matriz de diagnóstico, veredicto y exportación 
 import csv
 import os
 import datetime
+from html import escape
 from rich.table import Table
 from rich.panel import Panel
 from rich.text import Text
 
-from diagnosqui.core.platform_utils import get_backend
 from diagnosqui.diagnostico.matriz import build_diagnostic_matrix, diagnostico_final
 from diagnosqui.ui.theme import console, print_header, print_status_badge
 
@@ -25,6 +25,8 @@ def generate_csv_report(matrix: list, verdict: dict, filename: str = "reporte_di
         writer.writerow(["--- Veredicto Final ---"])
         for i, c in enumerate(verdict["causas"], 1):
             writer.writerow([f"Causa {i}", c])
+        if verdict.get("fuente"):
+            writer.writerow(["Fuente de los resultados", verdict["fuente"]])
     return filepath
 
 
@@ -33,10 +35,16 @@ def generate_html_report(matrix: list, verdict: dict, sys_info: dict, filename: 
     filepath = os.path.abspath(filename)
     now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
+    # Los nombres de hardware y textos de proveedores no son HTML de confianza.
+    matrix = [{key: escape(str(value)) for key, value in row.items()} for row in matrix]
+    verdict = dict(verdict, **{key: [escape(str(value)) for value in verdict.get(key, [])]
+                              for key in ("causas", "justificaciones", "recomendaciones")})
+    sys_info = {key: escape(str(value)) for key, value in sys_info.items()}
+
     # Armar filas de la tabla
     rows_html = ""
     for r in matrix:
-        status_color = "#22c55e" if r["estado"] == "OK" else ("#eab308" if r["estado"] == "ALERTA" else "#ef4444")
+        status_color = "#22c55e" if r["estado"] in ("OK", "NORMAL") else ("#eab308" if r["estado"] in ("ALERTA", "ADVERTENCIA") else "#ef4444")
         rows_html += f"""
         <tr>
             <td><strong>{r['componente']}</strong></td>
@@ -163,6 +171,7 @@ def generate_html_report(matrix: list, verdict: dict, sys_info: dict, filename: 
 
         <div class="card">
             <h2>Información del Entorno Auditado</h2>
+            <p>Fuente: {sys_info.get("fuente", "real")}</p>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
                 <div><span style="color: var(--muted);">Sistema Operativo:</span><br><strong>{sys_info.get('os')}</strong></div>
                 <div><span style="color: var(--muted);">Procesador:</span><br><strong>{sys_info.get('processor')}</strong></div>
@@ -274,3 +283,10 @@ def show_reporte(export_files: bool = True):
         html_path = generate_html_report(matrix, verdict, sys_info)
         console.print(f"[green][OK][/green] Reporte CSV exportado en:  [bold white]{csv_path}[/bold white]")
         console.print(f"[green][OK][/green] Reporte HTML exportado en: [bold white]{html_path}[/bold white]")
+
+
+def export_diagnostic_results(results: list, directory: str,
+                              formats: tuple = ("json", "csv", "html")) -> dict:
+    """Exporta contratos actuales sin ejecutar ni imprimir diagnósticos adicionales."""
+    from diagnosqui.core.report_exports import export_diagnostic_results as export_results
+    return export_results(results, directory, formats)

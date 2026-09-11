@@ -3,6 +3,9 @@ Pruebas unitarias para los módulos base de DiagnosQui.
 """
 import os
 import unittest
+from contextlib import ExitStack
+from unittest.mock import patch
+from diagnosqui.core.estados import crear_contrato_base, clasificar_porcentaje
 from diagnosqui.core.platform_utils import get_backend
 from diagnosqui.backends.base import BaseBackend
 from diagnosqui.diagnostico.matriz import build_diagnostic_matrix, diagnostico_final
@@ -111,6 +114,31 @@ class DummyMockBackend(BaseBackend):
     def get_io_delta(self, duration: int = 3):
         return {"duration": duration, "disk": {}, "net": {}}
 
+    def get_connectivity_info(self):
+        return crear_contrato_base("Conectividad", "Conectividad de prueba", 3, "NORMAL")
+
+
+def fixture_matrix(backend):
+    """La matriz actual llama recolectores sin argumentos, que reciben contratos."""
+    cpu = backend.get_cpu_info()
+    memory = backend.get_memory_info()
+    disk = backend.get_disks_info()
+    usb = backend.get_usb_devices()
+    gpu = backend.get_gpu_info()
+    problems = backend.get_problem_devices()
+    contracts = {
+        "cpu": crear_contrato_base("CPU", f"{cpu['total_percent']}%", cpu['total_percent'], clasificar_porcentaje(cpu['total_percent'])),
+        "memoria": crear_contrato_base("Memoria", f"{memory['percent']}%", memory['percent'], clasificar_porcentaje(memory['percent'])),
+        "discos": crear_contrato_base("Almacenamiento", "39%", 39, "NORMAL", disk),
+        "usb": crear_contrato_base("USB", "USB de prueba", usb['problem_count'], "ADVERTENCIA" if usb['problem_count'] else "NORMAL", usb),
+        "gpu": crear_contrato_base("GPU", "GPU de prueba", 0 if gpu['is_healthy'] else 1, "NORMAL" if gpu['is_healthy'] else "CRITICO", gpu),
+        "problemas": crear_contrato_base("Problemas", "Sin incidencias", 0, "NORMAL", problems),
+    }
+    with ExitStack() as patches:
+        for name, contract in contracts.items():
+            patches.enter_context(patch(f"diagnosqui.diagnostico.matriz.recolectar_{name}", return_value=contract))
+        return build_diagnostic_matrix()
+
 
 class TestDiagnosQuiCore(unittest.TestCase):
 
@@ -123,7 +151,7 @@ class TestDiagnosQuiCore(unittest.TestCase):
 
     def test_matrix_and_verdict_healthy(self):
         backend = DummyMockBackend(cpu_high=False, usb_err=False, gpu_err=False)
-        matrix = build_diagnostic_matrix(backend)
+        matrix = fixture_matrix(backend)
         self.assertEqual(len(matrix), 6)
 
         verdict = diagnostico_final(matrix)
@@ -132,7 +160,7 @@ class TestDiagnosQuiCore(unittest.TestCase):
     def test_matrix_and_verdict_reto_scenario(self):
         # Caso reto: CPU alta + USB error + GPU error
         backend = DummyMockBackend(cpu_high=True, usb_err=True, gpu_err=True)
-        matrix = build_diagnostic_matrix(backend)
+        matrix = fixture_matrix(backend)
         verdict = diagnostico_final(matrix)
 
         self.assertFalse(verdict["is_healthy"])
@@ -143,7 +171,7 @@ class TestDiagnosQuiCore(unittest.TestCase):
     def test_report_exports(self):
         backend = DummyMockBackend()
         sys_info = backend.get_system_info()
-        matrix = build_diagnostic_matrix(backend)
+        matrix = fixture_matrix(backend)
         verdict = diagnostico_final(matrix)
 
         test_csv = "test_report.csv"

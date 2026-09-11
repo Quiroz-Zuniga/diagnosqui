@@ -1,25 +1,22 @@
-# Instalador de DiagnosQui para Windows PowerShell
+# Instalador de DiagnosQui para Windows 10 y 11.
 $ErrorActionPreference = "Stop"
-
-Write-Host "==========================================" -ForegroundColor Cyan
-Write-Host "     Instalador de DiagnosQui (Windows)    " -ForegroundColor Cyan
-Write-Host "==========================================" -ForegroundColor Cyan
-
-$VenvPath = Join-Path $env:USERPROFILE ".diagnosqui-venv"
-$PipExe = Join-Path $VenvPath "Scripts\pip.exe"
+$VenvPath = if ($env:DIAGNOSQUI_VENV) { $env:DIAGNOSQUI_VENV } else { Join-Path $env:USERPROFILE ".diagnosqui-venv" }
 $PythonExe = Join-Path $VenvPath "Scripts\python.exe"
 
-Write-Host "-> Creando entorno virtual en $VenvPath..." -ForegroundColor Yellow
+Write-Host "Instalando DiagnosQui: escritorio y terminal" -ForegroundColor Cyan
+python -c "import sys; sys.exit(0 if sys.version_info >= (3, 9) else 'Se requiere Python 3.9 o posterior')"
+if ($LASTEXITCODE -ne 0) { throw "Python 3.9 o posterior debe estar disponible en PATH." }
 python -m venv $VenvPath
-
-Write-Host "-> Actualizando pip e instalando dependencias..." -ForegroundColor Yellow
-& $PipExe install --upgrade pip
-& $PipExe install -e .[windows]
+if ($LASTEXITCODE -ne 0) { throw "No se pudo crear el entorno virtual." }
+& $PythonExe -m pip install --upgrade pip
+if ($LASTEXITCODE -ne 0) { throw "No se pudo actualizar pip." }
+& $PythonExe -m pip install -e "${PSScriptRoot}[windows]"
+if ($LASTEXITCODE -ne 0) { throw "No se pudieron instalar las dependencias." }
 
 $ScriptsDir = Join-Path $VenvPath "Scripts"
-Write-Host ""
-Write-Host "¡Instalación completada exitosamente!" -ForegroundColor Green
-Write-Host "Para ejecutar directamente:" -ForegroundColor Cyan
-Write-Host "  & `"$ScriptsDir\diagnosqui.exe`"" -ForegroundColor White
-Write-Host "O agrega la siguiente ruta a tus Variables de Entorno (PATH):" -ForegroundColor Cyan
-Write-Host "  $ScriptsDir" -ForegroundColor White
+Write-Host "Instalación completada." -ForegroundColor Green
+Write-Host "Escritorio (sin consola):"
+Write-Host "  Start-Process `"$ScriptsDir\DiagnosQui-Escritorio.exe`""
+Write-Host "Terminal:"
+Write-Host "  & `"$ScriptsDir\diagnosqui.exe`""
+Write-Host "También puedes agregar $ScriptsDir a PATH."
